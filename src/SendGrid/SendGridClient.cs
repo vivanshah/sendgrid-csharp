@@ -22,8 +22,17 @@ namespace SendGrid
     /// </summary>
     public class SendGridClient
     {
+        /// <summary>
+        /// The API version.
+        /// </summary>
         private readonly string version;
+        /// <summary>
+        /// The request media type.
+        /// </summary>
         private readonly string mediaType;
+        /// <summary>
+        /// Reusable HTTP Client.
+        /// </summary>
         private HttpClient client;
 
         /// <summary>
@@ -34,8 +43,9 @@ namespace SendGrid
         /// <param name="host">Base url (e.g. https://api.sendgrid.com)</param>
         /// <param name="requestHeaders">A dictionary of request headers</param>
         /// <param name="version">API version, override AddVersion to customize</param>
+        /// <param name="urlPath">Path to endpoint (e.g. /path/to/endpoint)</param>
         /// <returns>Interface to the SendGrid REST API</returns>
-        public SendGridClient(IWebProxy webProxy, string apiKey, string host = null, Dictionary<string, string> requestHeaders = null, string version = "v3")
+        public SendGridClient(IWebProxy webProxy, string apiKey, string host = null, Dictionary<string, string> requestHeaders = null, string version = "v3", string urlPath = null)
         {
             this.version = version;
 
@@ -60,7 +70,7 @@ namespace SendGrid
                 client = new HttpClient();
             }
 
-            // standard headers
+            // Standard headers
             client.BaseAddress = new Uri(baseAddress);
             Dictionary<string, string> headers = new Dictionary<string, string>
             {
@@ -70,7 +80,7 @@ namespace SendGrid
                 { "Accept", "application/json" }
             };
 
-            // set header overrides
+            // Set header overrides
             if (requestHeaders != null)
             {
                 foreach (var header in requestHeaders)
@@ -79,7 +89,7 @@ namespace SendGrid
                 }
             }
 
-            // add headers to httpClient
+            // Add headers to httpClient
             foreach (var header in headers)
             {
                 if (header.Key == "Authorization")
@@ -106,8 +116,9 @@ namespace SendGrid
         /// <param name="host">Base url (e.g. https://api.sendgrid.com)</param>
         /// <param name="requestHeaders">A dictionary of request headers</param>
         /// <param name="version">API version, override AddVersion to customize</param>
+        /// <param name="urlPath">Path to default endpoint (e.g. /path/to/endpoint)</param>
         /// <returns>Interface to the SendGrid REST API</returns>
-        public SendGridClient(string apiKey, string host = null, Dictionary<string, string> requestHeaders = null, string version = "v3")
+        public SendGridClient(string apiKey, string host = null, Dictionary<string, string> requestHeaders = null, string version = "v3", string urlPath = null)
             : this(null, apiKey, host, requestHeaders, version)
         {
         }
@@ -220,10 +231,10 @@ namespace SendGrid
         public async Task<Response> SendEmailAsync(SendGridMessage msg, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await RequestAsync(
-                                           Method.POST,
-                                           msg.Serialize(),
-                                           urlPath: "mail/send",
-                                           cancellationToken: cancellationToken).ConfigureAwait(false);
+                                      Method.POST,
+                                      msg.Serialize(),
+                                      urlPath: "mail/send",
+                                      cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
